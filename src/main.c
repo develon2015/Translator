@@ -67,7 +67,9 @@ main(int argc, char *argv[]) {
 		break;
 DEFAULT:
 	default:
-		printf("翻译程序\n\t%s [sl] [tl] <tc>\n", argv[0]);
+		printf("翻译程序\n\t%s [sl] [tl] <tc>\n\t交互式Shell中可以切换语种, "\
+			"使用\":sl tl\"命令即可\n\t例如\":en_US zh_CN\"\n\n"\
+			"\t%s\n\n", argv[0], __DATE__ " - " __TIME__);
 		return 1;
 	}
 
@@ -86,13 +88,31 @@ DEFAULT:
 	remoteAddr.sin_port = PORT;
 	remoteAddr.sin_addr.s_addr = addr.s_addr;
 
-	
 	if (isShell)
+GETLINE:
 		while (1) {
 			char buf[10240] = { 0 };
 			if (fgets(buf, 10240, stdin) == NULL)
 				return 0;
+			if (buf[0] == ':') {
+				// 切换源和目标语言
+				char bufSL[128] = { 0 };
+				char bufTL[128] = { 0 };
+				int n = sscanf(&buf[1], "%s %s", bufSL, bufTL);
+				if (n > 0) {
+					if (n == 1)
+						tl = bufSL;
+					else {
+						sl = bufSL;
+						tl = bufTL;
+					}
+					printf("[INFO]语种切换: %s -> %s.\n", sl, tl);
+					goto GETLINE;
+				}
+			}
 			buf[strlen(buf) - 1] = '\0';
+			if (strcmp("", buf) == 0 || strcmp(" ", buf) == 0)
+				continue;
 			log("翻译%s", buf);
 			translate(buf);
 		}
