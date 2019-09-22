@@ -90,8 +90,9 @@ DEFAULT:
 	if (isShell)
 		while (1) {
 			char buf[10240] = { 0 };
-			if (gets(buf) == NULL)
+			if (fgets(buf, 10240, stdin) == NULL)
 				return 0;
+			buf[strlen(buf) - 1] = '\0';
 			log("翻译%s", buf);
 			translate(buf);
 		}
