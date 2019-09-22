@@ -20,6 +20,7 @@
 "Host: " HOST "\r\n"\
 "User-Agent: Chrome/12.8\r\n"\
 "Accept: application/json\r\n"\
+"Connection: close\r\n"\
 "\r\n"
 
 #define DEBUG 0
@@ -157,8 +158,16 @@ translate(const char *target) {
 	log("写入%d字节", n);
 
 	memset(buf, 0, sizeof buf);
-	n = read(sock, buf, sizeof buf);
-	log("读取%d字节", n);
+	while (1) {
+		char bufSegm[10240] = { 0 };
+		n = read(sock, bufSegm, sizeof bufSegm);
+		if (n < 1) {
+			log("连接被关闭");
+			break;
+		}
+		log("读取%d字节", n);
+		strcat(buf, bufSegm);
+	}
 	log("RESPONSE:\n%s", buf);
 
 	// 处理response
@@ -180,14 +189,15 @@ handle(const char *response) {
 		return;
 	}
 	const char *body = getBody(response);
+	log("关注body:\n%s", body);
 	char *result = (char *)malloc(strlen(body));
 	result = getJSONValue(body, "trans");
 	if (result == NULL) {
 		printf("翻译失败: %s\n", body);
 		return;
 	}
-	result[strlen(result) - 1] = '\0';
-	printf("%s\n", &result[2]);
+	//result[strlen(result) - 1] = '\0';
+	printf("%s\n", result);
 }
 
 // 获取 Response body 部分, 删除了头部的空行
@@ -263,6 +273,9 @@ getJSONValue(const char *json, const char *key) {
 	log("查找key:%s", key);
 	int n = strlen(json);
 	int nk = strlen(key);
+	char *result = (char *)malloc(n);
+	memset(result, 0, n);
+	int isSucceed = 0;
 	for (int i = 0; i < n; i ++ ) {
 		if (json[i] == '"' && json[i+1] == *key) { // "k...
 			log("有点儿意思:%s", &json[i]);
@@ -280,11 +293,17 @@ getJSONValue(const char *json, const char *key) {
 				int offe = strcspn(&json[i], ",");
 				log("s&e %d %d", offs, offe);
 				strncpy(buf, &json[i + offs], offe - offs);
-				log("找到:%s", buf);
-				return buf;
+				//return buf;
+				// cat buf to result
+				buf[strlen(buf) - 1] = '\0';
+				log("找到:%s", &buf[2]);
+				strcat(result, &buf[2]);
+				isSucceed ++ ;
 			}
 		}
 	}
+	if (isSucceed)
+		return result;
 	return NULL;
 }
 
