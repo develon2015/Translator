@@ -30,12 +30,14 @@
 #define log(args, ...) printf(args"\n", ##__VA_ARGS__)
 #endif
 
+int
+translate(const char *target);
 void
 handle(const char *response);
 const char *
 getBody(const char *response);
 char *
-URIEncode(char *uri);
+URIEncode(const char *uri);
 char *
 getJSONValue(const char *json, const char *key);
 
@@ -43,10 +45,18 @@ char *sl = "auto";
 char *tl = "zh_CN";
 char *target = NULL;
 
+struct sockaddr_in remoteAddr = { 0 };
+
 int
 main(int argc, char *argv[]) {
+	int isShell = 0;
 	switch (argc) {
+	case 1: // 交互式 OR 管道式
+		isShell = 1;
+		break;
 	case 2:
+		if (strcmp("-h", argv[argc - 1]) == 0)
+			goto DEFAULT;
 		break;
 	case 3: // 指定了目标语言
 		tl = argv[1];
@@ -55,11 +65,11 @@ main(int argc, char *argv[]) {
 		sl = argv[1];
 		tl = argv[2];
 		break;
+DEFAULT:
 	default:
 		printf("翻译程序\n\t%s [sl] [tl] <tc>\n", argv[0]);
 		return 1;
 	}
-	target = URIEncode(argv[argc - 1]);
 
 	// 解析 IP 地址
 	struct in_addr addr = { 0 };
@@ -67,20 +77,39 @@ main(int argc, char *argv[]) {
 		puts("解析服务器地址失败");
 		return 2;
 	}
-	char buf[10240] = { 0 };
+	char buf[128] = { 0 };
 	inet_ntop(AF_INET, &addr, buf, sizeof buf);
 	log("服务器地址: %s", buf);
 
+	// 设置远程主机地址和端口
+	remoteAddr.sin_family = AF_INET;
+	remoteAddr.sin_port = PORT;
+	remoteAddr.sin_addr.s_addr = addr.s_addr;
+
+	
+	if (isShell)
+		while (1) {
+			char buf[10240] = { 0 };
+			if (gets(buf) == NULL)
+				return 0;
+			log("翻译%s", buf);
+			translate(buf);
+		}
+	else {
+		translate(argv[argc - 1]);
+	}
+}
+
+
+int
+translate(const char *target) {
 	// HTTP GET 请求
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock < 1) {
 		perror("socket");
 		return 3;
 	}
-	struct sockaddr_in remoteAddr = { 0 };
-	remoteAddr.sin_family = AF_INET;
-	remoteAddr.sin_port = PORT;
-	remoteAddr.sin_addr.s_addr = addr.s_addr;
+
 	log("连接服务器中...");
 	int n = connect(sock, (void *)&remoteAddr, sizeof remoteAddr);
 	if (n != 0) {
@@ -89,7 +118,11 @@ main(int argc, char *argv[]) {
 	}
 	log("已连接服务器.");
 
+	// 发送请求之前处理URI编码
+	target = URIEncode(target);
+
 	// 单线程发送, 接收数据
+	char buf[10240] = { 0 };
 	memset(buf, 0, sizeof buf);
 	sprintf(buf, HEADER, sl, tl, target);
 	log("HEADER:\n%ssize: %ld", buf, strlen(buf));
@@ -107,10 +140,9 @@ main(int argc, char *argv[]) {
 	log("读取%d字节", n);
 	log("RESPONSE:\n%s", buf);
 
+	// 处理response
 	handle(buf);
 	close(sock);
-
-	// 处理response
 
 	return 0;
 }
@@ -133,7 +165,8 @@ handle(const char *response) {
 		printf("翻译失败: %s\n", body);
 		return;
 	}
-	printf("翻译结果%s\n", result);
+	result[strlen(result) - 1] = '\0';
+	printf("%s\n", &result[2]);
 }
 
 // 获取 Response body 部分, 删除了头部的空行
@@ -177,10 +210,10 @@ isURIChar(const char ch) {
 }
 
 char *
-URIEncode(char *uri) {
+URIEncode(const char *uri) {
 	int n = strlen(uri);
 	char *cp = (char *)malloc(n * 3);
-	memset(cp, 0, n);
+	memset(cp, 0, n * 3);
 	int pn = 0;
 	// scan uri
 	for (int i = 0; i < n; i ++ ) {
