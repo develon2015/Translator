@@ -13,13 +13,13 @@ $ tl -h
         Sep 22 2019 - 09:33:24
 
 $ tl わたし、プログラミングが好きなの
-翻译结果:"我喜欢编程"
+我喜欢编程
 
 $ tl ja_JP zh_TW わたし、プログラミングが好きなの
-翻译结果:"我喜歡編程"
+我喜歡編程
 
 $ tl en_US わたし、プログラミングが好きなの
-翻译结果:"I like programming"
+I like programming
 
 $ tl
 Are you OK?
