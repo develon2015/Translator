@@ -24,13 +24,19 @@ $ tl en_US わたし、プログラミングが好きなの
 $ tl
 Are you OK?
 你还好吗？
+
 :ja
 [INFO]语种切换: auto -> ja.
+
 Are you OK?
 大丈夫ですか？
+
+:auto zh_HK
 [INFO]语种切换: auto -> zh_HK.
+
 大丈夫ですか？
 你還好嗎？
+
 ^D
 ```
 
