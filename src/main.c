@@ -289,8 +289,14 @@ getJSONValue(const char *json, const char *key) {
 			if (isTarget && json[i + nk + 1] == '"') { // "key"...
 				char *buf = (char *)malloc(n);
 				memset(buf, 0, n);
-				int offs = strcspn(&json[i], ":");
-				int offe = strcspn(&json[i], ",");
+				int offs = strcspn(&json[i], ":"); // "key"(:.*)
+				int offe = n - 1;
+				for (int k = offs; k < n; k ++ ) {
+					if (json[i + k] == ',' && json[i + k + 1] == '"') {
+							offe = k;
+							break;
+					}
+				}
 				log("s&e %d %d", offs, offe);
 				strncpy(buf, &json[i + offs], offe - offs);
 				//return buf;
