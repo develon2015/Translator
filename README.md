@@ -1,6 +1,22 @@
 Translator
 ===
 
+安装
+---
+直接下载
+```
+wget https://github.com/develon2015/Translator/raw/master/bin_x64/tl
+chmod +x tl
+./tl hello
+```
+编译安装，请先安装gcc、make
+```
+git clone https://github.com/develon2015/Translator
+make clean
+make
+make install
+```
+
 运行效果
 ---
 ```

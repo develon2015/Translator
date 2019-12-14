@@ -10,8 +10,8 @@ src/uclib/uclib.a:
 $(DIR):
 	mkdir $@
 
-.PHONY: deploy
-deploy:
+.PHONY: deploy install
+install deploy:
 	sudo cp $(BIN) /usr/bin
 
 .PHONY: clean

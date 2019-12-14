@@ -89,6 +89,10 @@ DEFAULT:
 	remoteAddr.sin_port = PORT;
 	remoteAddr.sin_addr.s_addr = addr.s_addr;
 
+	// 新特性
+	if (strcmp("--", argv[argc - 1]) == 0)
+		isShell = 1;
+
 	if (isShell)
 GETLINE:
 		while (1) {
@@ -97,9 +101,9 @@ GETLINE:
 				return 0;
 			if (buf[0] == ':') {
 				// 切换源和目标语言
-				char bufSL[128] = { 0 };
-				char bufTL[128] = { 0 };
-				int n = sscanf(&buf[1], "%s %s", bufSL, bufTL);
+				char *bufSL = (char *)malloc(128);
+				char *bufTL = (char *)malloc(128);
+				int n = sscanf(buf, ":%s %s", bufSL, bufTL);
 				if (n > 0) {
 					if (n == 1)
 						tl = bufSL;
