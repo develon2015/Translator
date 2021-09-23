@@ -1,7 +1,10 @@
 {
-    "name": "app",
+    "name": "@develon/tl",
     "version": "1.0.0",
-    "main": "dist/main.js",
+    "description": "A Terminal translator.",
+    "bin": {
+        "tl": "bin/index.js"
+    },
     "scripts": {
         "setup": "nds --eject && yarn add -D @types/node",
         "start:dev": "nds",
@@ -11,5 +14,18 @@
     "license": "MIT",
     "devDependencies": {
         "@types/node": "^16.9.6"
-    }
+    },
+    "author": "develon <develon@qq.com>",
+    "homepage": "https://github.com/develon2015/Translator",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/develon2015/Translator.git"
+    },
+    "publishConfig": {
+      "access": "public"
+    },
+    "keywords": [
+      "Terminal",
+      "Translator"
+    ]
 }
