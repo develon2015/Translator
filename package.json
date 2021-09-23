@@ -1,6 +1,6 @@
 {
     "name": "@develon/tl",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A Terminal translator.",
     "bin": {
         "tl": "bin/index.js"

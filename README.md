@@ -17,8 +17,8 @@ tl config http://127.0.0.1:25378
 You can enable/disable proxy:
 
 ```
-tl config on
-tl config off
+sudo tl config on
+sudo tl config off
 ```
 
 # Usage
