@@ -1,6 +1,8 @@
 Translator
 ===
 
+由于网络原因，API无法直接访问，请使用可设置 HTTP 代理的 [Node.js 版本](https://github.com/develon2015/Translator/tree/node)
+
 安装
 ---
 直接下载
