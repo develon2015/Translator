@@ -9,7 +9,7 @@ import { URL } from "url";
 const PATH = normalize(__dirname + '/config.json');
 
 const config = JSON.parse(readFileSync(PATH).toString());
-const { proxy } = config;
+const { enable, proxy } = config;
 
 function translate(str, target = 'zh_CN', source = 'auto') {
     // console.log(`${source} -> ${target}: ${str}`);
@@ -19,7 +19,7 @@ function translate(str, target = 'zh_CN', source = 'auto') {
     var url = encodeURI(`http://translate.google.com/translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=${source}&tl=${target}&q=${str}`);
     var redirect = os_redirect();
 
-    var cmd = `curl --proxy ${proxy} "${url}" ${redirect}`;
+    var cmd = enable ? `curl --proxy ${proxy} "${url}" ${redirect}` : `curl "${url}" ${redirect}`;
     // console.log(cmd);
     var result = execSync(cmd).toString();
     // console.log(result);
@@ -86,10 +86,12 @@ if (argv.length < 3) { // 交互式
     }
 
     if (opt.some(it => ['h', 'help', '-h', '-help', '--h', '--help'].some(them => it === them))) {
+        const pack = require(__dirname + '/../package.json');
         console.log(
             `Help:
             config \t\t 获取配置信息
             config <proxy> \t 设置代理
+            config [on | off] \t 设置代理启用状态，默认：off
             
             [[源语种] [目标语种]] [<单句> | -- <单词1> <单词2>]
             e.g.
@@ -97,14 +99,20 @@ if (argv.length < 3) { // 交互式
             \t tl zh_CN Hello
             \t tl en ja_JP Hello
             \t tl en_US zh_TW -- Hello World!
+            
+            version: ${pack.version}
             `
         );
     } else if (opt[0] === 'config') {
         if (opt.length === 2) {
-            new URL(opt[1]);
-            config.proxy = new URL(opt[1]).origin;
+            if (opt[1] === 'on' || opt[1] === 'off') {
+                config.enable = opt[1] === 'on';
+            } else {
+                new URL(opt[1]);
+                config.proxy = new URL(opt[1]).origin;
+            }
             writeFileSync(PATH, JSON.stringify(config, null, 2));
-            console.log(`Proxy is: ${config.proxy}.`);
+            console.log(`Proxy is: ${config.proxy}, enable: ${config.enable}`);
         } else {
             console.log(config);
         }
