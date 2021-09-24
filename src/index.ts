@@ -25,9 +25,11 @@ function translate(str, target = 'zh_CN', source = 'auto') {
     // console.log(result);
     var json = JSON.parse(result);
 
+    var out = '';
     json.sentences.forEach(it => {
-        console.log(it.trans);
+        out += it.trans;
     });
+    console.log(out);
 
     // var show = JSON.stringify(json, null, 2);
     // console.log(show);
@@ -45,7 +47,8 @@ if (argv.length < 3) { // 交互式
     });
 
     var str = '';
-    var st = new Date().getTime();
+    var st: number = null;
+    var task: NodeJS.Timeout = null;
     a.addListener('line', (_str) => {
 
         var cmd = _str;
@@ -60,13 +63,17 @@ if (argv.length < 3) { // 交互式
         }
 
         var et = new Date().getTime();
-        var d = et - st;
+        var d = st ? et - st : 0;
         st = et;
 
-        str += _str;
-        if (d > 600) {
-            translate(str, g_target, g_source);
-            str = '';
+        str += _str + '\n';
+        if (d < 500) {
+            task && clearTimeout(task);
+            task = setTimeout(() => {
+                translate(str.trim(), g_target, g_source);
+                str = '';
+                st = null;
+            }, 500);
         }
     });
 } else { // 命令式

@@ -35,5 +35,5 @@ Help:
                  tl en ja_JP Hello
                  tl en_US zh_TW -- Hello World!
 
-            version: 1.0.1
+            version: 1.0.4
 ```
