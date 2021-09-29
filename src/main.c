@@ -13,7 +13,7 @@
 #include <uclib/inc/net.h>
 #include <uclib/inc/tools.h>
 
-#define HOST "translate.google.cn"
+#define HOST "translate.my-api.workers.dev"
 #define PORT htons(80)
 #define HEADER \
 "GET /translate_a/single?client=gtx&dt=t&dj=1&ie=UTF-8&sl=%s&tl=%s&q=%s HTTP/1.1\r\n"\
