@@ -36,7 +36,7 @@ function translate(str, target = 'zh_CN', source = 'auto') {
 }
 
 function os_redirect() {
-    return ` 2> ${platform() === 'win32' ? 'null' : '/dev/null'}`;
+    return ` 2> ${platform() === 'win32' ? 'nul' : '/dev/null'}`;
 }
 
 var g_source, g_target;
